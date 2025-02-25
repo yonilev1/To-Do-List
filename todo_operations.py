@@ -5,35 +5,39 @@ class TaskStatus(Enum):
     DONE = "Done"
 
 class ToDoList:
-
-
     def __init__(self, file_name = "to_do_list.txt"):
         self.file_name = file_name
         self.tasks = {}
         self.load_tasks()
+
 
     def load_tasks(self):
         try:
             with open(self.file_name, "r") as file:
                 for line in file:
                     number, rest = line.strip().split(" - ", 1)
-                    task, status = rest.rsplit(" - ", 1)
-                    self.tasks[int(number)] = (task, status)
+                    # task = rest.keys()[0]
+                    # task, status = rest.rsplit(" : ", 1)
+                    rest = rest.strip("{}").replace("'", "").replace(":", "")
+                    task, status = rest.split(" ", 1)
+                    self.tasks[int(number)] = {task: status}
         except FileNotFoundError:
             pass
+
 
     def save_tasks(self):
         with open(self.file_name, "w") as file:
             for number, rest in self.tasks.items():
                 file.write(f"{number} - {rest}\n")
 
+
     def add_task(self):
         with open(self.file_name, "r", encoding="utf-8") as file:
             line_count = sum(1 for _ in file)
-
         task_to_add = input("enter a task to be added: ")
         self.tasks[line_count + 1] = {task_to_add : TaskStatus.TODO.value}
         self.save_tasks()
+
 
     def remove_task(self):
         self.print_tasks(TaskStatus.DONE.value, TaskStatus.TODO.value)
@@ -50,7 +54,6 @@ class ToDoList:
         self.print_tasks(TaskStatus.DONE.value, TaskStatus.TODO.value)
         task_num_to_edited = int(input("Enter the task number to edit: "))
         edited_task = input("Enter new task: ")
-
         if task_num_to_edited in self.tasks.keys():
             task_details = self.tasks[task_num_to_edited]
             task_status = next(iter(task_details.values()))
@@ -68,7 +71,6 @@ class ToDoList:
             if task_num_to_marked not in self.tasks:
                 print(f"Task with number {task_num_to_marked} not found.")
                 return
-
             try:
                 status = status.replace(" ", "")
                 new_status = TaskStatus[status.upper()].value
@@ -83,13 +85,14 @@ class ToDoList:
         except ValueError:
             print("Please enter a valid task number.")
 
-    def print_tasks(self, status1, status2=None):
-        for task_number, task_info in self.tasks.items():
-            task_name, current_status = next(iter(task_info.items()))  # חילוץ שם המשימה והסטטוס
 
+    def print_tasks(self, status1 : str, status2=None):
+        for task_number, task_info in self.tasks.items():
+            task_name, current_status = next(iter(task_info.items()))
             if current_status.lower() == status1.lower() or (
                     status2 is not None and current_status.lower() == status2.lower()):
                 print(f"{task_number} - {task_name} : {current_status}")
+
 
     def print_status(self):
         self.print_tasks(TaskStatus.DONE.value, TaskStatus.TODO.value)
@@ -104,11 +107,11 @@ class ToDoList:
         except ValueError:
             print("Invalid input. Please enter a valid task number.")
 
+
     def delete_list(self):
         self.tasks.clear()
         open(self.file_name, "w").close()  # Empty the file
         print("All tasks have been deleted.")
-
 
 
 class Options(Enum):
