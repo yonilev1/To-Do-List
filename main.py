@@ -1,3 +1,4 @@
+import todo_operations
 from todo_operations import *
 
 def main():
@@ -13,39 +14,41 @@ Enter 8 to print all done tasks:
 Enter 9 to print task's status:
 Enter 0 to exit:\n"""))
 
-    while mission != Options.exit:
+    my_list = todo_operations.ToDoList()
+    while mission != Options.exit.value:
 
         if mission == Options.add_task.value:
-            add_task()
+            my_list.add_task()
 
         elif mission == Options.remove_task.value:
-            remove_task()
+            my_list.remove_task()
 
         elif mission == Options.edit_task.value:
-            edit_task()
+            my_list.edit_task()
 
         elif mission == Options.mark_as_done.value:
-            mark_task("Done")
+            my_list.mark_task("Done")
 
         elif mission == Options.unmark_as_done.value:
-            mark_task("To Do")
+            my_list.mark_task("To Do")
 
         elif mission == Options.print_all_tasks.value:
-            print_tasks("To Do\n", "Do\n")
+            my_list.print_tasks("To Do", "Done")
 
         elif mission == Options.print_tasks_to_do.value:
-            print_tasks("To Do\n", "A")
+            my_list.print_tasks("To Do", "H")
 
         elif mission == Options.print_done_tasks.value:
-            print_tasks("Done\n", "A")
+            my_list.print_tasks("Done", "H")
 
         elif mission == Options.print_task_status.value:
-            print_status()
+            my_list.print_status()
 
         mission = int(input("Enter Your choice: "))
         if mission not in range(0, 10):
             mission = int(input("Not valid choice, Enter another choice: "))
-    delete_list()
+    my_list.delete_list()
+    print("Exit program.")
 
 if __name__ == '__main__':
     main()

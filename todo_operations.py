@@ -1,94 +1,115 @@
 from enum import Enum
 
+class TaskStatus(Enum):
+    TODO = "To Do"
+    DONE = "Done"
 
-def add_task():
-    task_to_add = input("enter a task to be added: ")
-    with open("to_do_list.txt", "a") as file:
-        file.write(f"{task_to_add} : To Do\n")
-
-def remove_task():
-    task_to_remove = input("Enter the task to remove: ")
-    with open("to_do_list.txt", "r") as file:
-        lines = file.readlines()
-
-    lines = [line for line in lines if not line.startswith(f"{task_to_remove} :")]
-
-    if len(lines) != len(open("to_do_list.txt", "r").readlines()):
-        with open("to_do_list.txt", "w") as file:
-            file.writelines(lines)
-        print(f"Task '{task_to_remove}' has been removed.")
-    else:
-        print(f"Task '{task_to_remove}' was not found in the list.")
+class ToDoList:
 
 
-def edit_task():
-    task_to_edited = input("Enter the task to edit: ")
-    with open("to_do_list.txt", "r") as file:
-        lines = file.readlines()
+    def __init__(self, file_name = "to_do_list.txt"):
+        self.file_name = file_name
+        self.tasks = {}
+        self.load_tasks()
 
-    task_found = False
-    for i, line in enumerate(lines):
-        if line.startswith(f"{task_to_edited} :"):
-            task_found = True
-            current_status = line.split(" : ")[1].strip()  # שמירה על הסטטוס הנוכחי
-            edited_task = input("Enter the edit: ")
-            lines[i] = f"{edited_task} : {current_status}\n"
-            break
+    def load_tasks(self):
+        try:
+            with open(self.file_name, "r") as file:
+                for line in file:
+                    number, rest = line.strip().split(" - ", 1)
+                    task, status = rest.rsplit(" - ", 1)
+                    self.tasks[int(number)] = (task, status)
+        except FileNotFoundError:
+            pass
 
-    if task_found:
-        with open("to_do_list.txt", "w") as file:
-            file.writelines(lines)
-        print(f"Task '{task_to_edited}' has been updated.")
-    else:
-        print(f"Task '{task_to_edited}' was not found in the list.")
+    def save_tasks(self):
+        with open(self.file_name, "w") as file:
+            for number, rest in self.tasks.items():
+                file.write(f"{number} - {rest}\n")
 
+    def add_task(self):
+        with open(self.file_name, "r", encoding="utf-8") as file:
+            line_count = sum(1 for _ in file)
 
-def mark_task(status):
-    task_to_marked = input(f"Enter the task to mark as {status}: ")
+        task_to_add = input("enter a task to be added: ")
+        self.tasks[line_count + 1] = {task_to_add : TaskStatus.TODO.value}
+        self.save_tasks()
 
-    with open("to_do_list.txt", "r") as file:
-        lines = file.readlines()
-
-    task_found = False
-    for i, line in enumerate(lines):
-        if line.startswith(f"{task_to_marked} :"):
-            task_found = True
-            lines[i] = f"{task_to_marked} : {status}\n"
-            break
-
-    if task_found:
-        with open("to_do_list.txt", "w") as file:
-            file.writelines(lines)
-        print(f"Task '{task_to_marked}' has been marked as {status}.")
-    else:
-        print(f"Task '{task_to_marked}' was not found in the list.")
+    def remove_task(self):
+        self.print_tasks(TaskStatus.DONE.value, TaskStatus.TODO.value)
+        task_num_to_remove = int(input("Enter number of task to remove: "))
+        if task_num_to_remove in self.tasks.keys():
+            del self.tasks[task_num_to_remove]
+            self.save_tasks()
+            print(f"Task '{task_num_to_remove}' has been removed.")
+        else:
+            print(f"Task '{task_num_to_remove}' was not found in the list.")
 
 
-def print_tasks(status1,status2):
-    with open("to_do_list.txt", "r") as file:
-        lines = file.readlines()
+    def edit_task(self):
+        self.print_tasks(TaskStatus.DONE.value, TaskStatus.TODO.value)
+        task_num_to_edited = int(input("Enter the task number to edit: "))
+        edited_task = input("Enter new task: ")
 
-    for i, line in enumerate(lines):
-        if line.endswith(f"{status1}") or line.endswith(f"{status2}"):
-            print(line)
-
-
-def print_status():
-    task = input("Enter task to be printed: ")
-    task = task.strip()
-    with open("to_do_list.txt", "r") as file:
-        lines = file.readlines()
-    for i, line in enumerate(lines):
-        if line.startswith(f"{task} :"):
-            print(line)
+        if task_num_to_edited in self.tasks.keys():
+            task_details = self.tasks[task_num_to_edited]
+            task_status = next(iter(task_details.values()))
+            self.tasks[task_num_to_edited] = {edited_task :task_status}
+            print(f"Task '{task_num_to_edited} - {edited_task}' has been updated.")
+        else:
+            print(f"Task '{task_num_to_edited} - {edited_task}' was not found in the list.")
 
 
-def delete_list():
-    with open("to_do_list.txt", "w") as file:
-        file.writelines(" ")
+    def mark_task(self, status : str):
+        self.print_tasks(TaskStatus.DONE.value, TaskStatus.TODO.value)
+        try:
+            task_num_to_marked = int(input(f"Enter the task number to mark as {status}: "))
+
+            if task_num_to_marked not in self.tasks:
+                print(f"Task with number {task_num_to_marked} not found.")
+                return
+
+            try:
+                status = status.replace(" ", "")
+                new_status = TaskStatus[status.upper()].value
+                item = list(self.tasks[task_num_to_marked].keys())[0]
+                self.tasks[task_num_to_marked] = {item : new_status}
+                print(
+                    f"Task '{task_num_to_marked} - {item}' has been updated to '{new_status}'.")
+                self.save_tasks()
+            except ValueError:
+                print(f"Invalid status '{status}'. Please choose from: {', '.join([s.value for s in TaskStatus])}")
+
+        except ValueError:
+            print("Please enter a valid task number.")
+
+    def print_tasks(self, status1, status2=None):
+        for task_number, task_info in self.tasks.items():
+            task_name, current_status = next(iter(task_info.items()))  # חילוץ שם המשימה והסטטוס
+
+            if current_status.lower() == status1.lower() or (
+                    status2 is not None and current_status.lower() == status2.lower()):
+                print(f"{task_number} - {task_name} : {current_status}")
+
+    def print_status(self):
+        self.print_tasks(TaskStatus.DONE.value, TaskStatus.TODO.value)
+        try:
+            task_number = int(input("Enter task number to check status: "))
+            if task_number in self.tasks:
+                task = list(self.tasks[task_number].keys())[0]
+                status = list(self.tasks[task_number].values())[0]
+                print(f"Task {task_number} - {task} status: {status}")
+            else:
+                print("Task not found.")
+        except ValueError:
+            print("Invalid input. Please enter a valid task number.")
+
+    def delete_list(self):
+        self.tasks.clear()
+        open(self.file_name, "w").close()  # Empty the file
+        print("All tasks have been deleted.")
 
 
-to_do_list = {}
 
 class Options(Enum):
     exit = 0
