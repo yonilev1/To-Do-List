@@ -1,8 +1,8 @@
 import todo_operations
 from todo_operations import *
 
-def main():
-    mission = int(input("""
+def get_users_choice() -> int:
+    choice = input("""
 Enter 1 to add a task:
 Enter 2 to remove a task:
 Enter 3 to edit a task:
@@ -12,10 +12,19 @@ Enter 6 to print all tasks:
 Enter 7 to print all to do tasks:
 Enter 8 to print all done tasks:
 Enter 9 to print task's status:
-Enter 0 to exit:\n"""))
+Enter 0 to exit:\n""")
 
+    while choice not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+        choice = input("Invalid. Enter your choice: :")
+
+    return int(choice)
+
+def main():
     my_list = todo_operations.ToDoList()
-    while mission != Options.exit.value:
+    while True:
+        mission = get_users_choice()
+        if mission == Options.exit.value:
+            break
 
         if mission == Options.add_task.value:
             my_list.add_task()
@@ -44,9 +53,6 @@ Enter 0 to exit:\n"""))
         elif mission == Options.print_task_status.value:
             my_list.print_status()
 
-        mission = int(input("Enter Your choice: "))
-        if mission not in range(0, 10):
-            mission = int(input("Not valid choice, Enter another choice: "))
     my_list.delete_list()
     print("Exit program.")
 
