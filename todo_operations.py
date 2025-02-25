@@ -1,4 +1,6 @@
 from enum import Enum
+from datetime import *
+import ast
 
 class TaskStatus(Enum):
     TODO = "To Do"
@@ -16,11 +18,10 @@ class ToDoList:
             with open(self.file_name, "r") as file:
                 for line in file:
                     number, rest = line.strip().split(" - ", 1)
-                    # task = rest.keys()[0]
-                    # task, status = rest.rsplit(" : ", 1)
                     rest = rest.strip("{}").replace("'", "").replace(":", "")
                     task, status = rest.split(" ", 1)
-                    self.tasks[int(number)] = {task: status}
+                    status, date_created, date_done = status.strip("[]").split(", ")
+                    self.tasks[int(number)] = {task: [status, date_created, date_done]}
         except FileNotFoundError:
             pass
 
@@ -35,7 +36,7 @@ class ToDoList:
         with open(self.file_name, "r", encoding="utf-8") as file:
             line_count = sum(1 for _ in file)
         task_to_add = input("enter a task to be added: ")
-        self.tasks[line_count + 1] = {task_to_add : TaskStatus.TODO.value}
+        self.tasks[line_count + 1] = {task_to_add : [TaskStatus.TODO.value,f"created on {date.today()}", " "]}
         self.save_tasks()
 
 
@@ -74,10 +75,14 @@ class ToDoList:
             try:
                 status = status.replace(" ", "")
                 new_status = TaskStatus[status.upper()].value
-                item = list(self.tasks[task_num_to_marked].keys())[0]
-                self.tasks[task_num_to_marked] = {item : new_status}
+                task = list(self.tasks[task_num_to_marked].keys())[0]
+                status_and_dates = list(self.tasks[task_num_to_marked].values())[0]
+                if status_and_dates[0].lower() == TaskStatus.TODO.value.lower():
+                    self.tasks[task_num_to_marked] = {task : [new_status, status_and_dates[1], f"done date {date.today()}"]}
+                else:
+                    self.tasks[task_num_to_marked] = {task: [new_status, status_and_dates[1], ""]}
                 print(
-                    f"Task '{task_num_to_marked} - {item}' has been updated to '{new_status}'.")
+                    f"Task '{task_num_to_marked} - {task}' has been updated to '{new_status}'.")
                 self.save_tasks()
             except ValueError:
                 print(f"Invalid status '{status}'. Please choose from: {', '.join([s.value for s in TaskStatus])}")
@@ -89,8 +94,8 @@ class ToDoList:
     def print_tasks(self, status1 : str, status2=None):
         for task_number, task_info in self.tasks.items():
             task_name, current_status = next(iter(task_info.items()))
-            if current_status.lower() == status1.lower() or (
-                    status2 is not None and current_status.lower() == status2.lower()):
+            if current_status[0].lower() == status1.lower() or (
+                    status2 is not None and current_status[0].lower() == status2.lower()):
                 print(f"{task_number} - {task_name} : {current_status}")
 
 
@@ -100,8 +105,11 @@ class ToDoList:
             task_number = int(input("Enter task number to check status: "))
             if task_number in self.tasks:
                 task = list(self.tasks[task_number].keys())[0]
-                status = list(self.tasks[task_number].values())[0]
-                print(f"Task {task_number} - {task} status: {status}")
+                status_and_dates = list(self.tasks[task_number].values())[0]
+                if status_and_dates[0] == TaskStatus.TODO.value:
+                    print(f"Task {task_number} - {task} status: {status_and_dates[0], status_and_dates[1]}")
+                else:
+                    print(f"Task {task_number} - {task} status: {status_and_dates[0], status_and_dates[1], status_and_dates[2]}")
             else:
                 print("Task not found.")
         except ValueError:
