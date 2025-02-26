@@ -53,7 +53,9 @@ def main():
         elif mission == Options.print_task_status.value:
             my_list.print_status()
 
-    my_list.delete_list()
+        elif mission == Options.delete_all_tasks.value:
+            my_list.delete_list()
+
     print("Exit program.")
 
 if __name__ == '__main__':
