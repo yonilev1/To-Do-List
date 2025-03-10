@@ -4,7 +4,6 @@ import re
 
 def create_main_window():
     # Define input width, button width, and padding values
-    input_width = 20
     button_width = 15
     pad_value = ((10, 10), (5, 5))
 
