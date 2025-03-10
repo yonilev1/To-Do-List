@@ -24,7 +24,7 @@ class ToDoList:
 
     def load_tasks(self):
         """
-        Load tasks from the file into the tasks dictionary.
+        Load tasks from the file into the tasks' dictionary.
         If the file is not found or is empty, initialize an empty task dictionary.
         """
         try:
