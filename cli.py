@@ -1,53 +1,34 @@
-import todo_operations
 from todo_operations import *
 
-'''def get_users_choice() -> int:
-    choice = input("""
-Enter 1 to add a task:
-Enter 2 to remove a task:
-Enter 3 to edit a task:
-Enter 4 to mark a task as done:
-Enter 5 to unmark a task:
-Enter 6 to print all tasks:
-Enter 7 to print all to do tasks:
-Enter 8 to print all done tasks:
-Enter 9 to print task's status:
-Enter 0 to exit:\n""")
 
-    while choice not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
-        choice = input("Invalid. Enter your choice: :")'''
-
-    #return int(choice)
-
-my_list = todo_operations.ToDoList()
+my_list = ToDoList()
 
 def get_list():
     return my_list.get_all_tasks()
 
 def main(mission, urgency = None, value_to_add = None, number = None, edit = None):
-    while True:
         if mission == Options.exit.value:
-            break
+            return
 
         if mission == Options.add_task.value:
             my_list.add_task(value_to_add, urgency)
-            break
+            return
 
         elif mission == Options.remove_task.value:
             my_list.remove_task(number)
-            break
+            return
 
         elif mission == Options.edit_task.value:
             my_list.edit_task(number, edit)
-            break
+            return
 
         elif mission == Options.mark_as_done.value:
             my_list.mark_task("Done", number)
-            break
+            return
 
         elif mission == Options.unmark_as_done.value:
             my_list.mark_task("To Do", number)
-            break
+            return
 
         elif mission == Options.print_all_tasks.value:
             print("in cli printing all")
@@ -65,10 +46,5 @@ def main(mission, urgency = None, value_to_add = None, number = None, edit = Non
 
         elif mission == Options.delete_all_tasks.value:
             my_list.delete_list()
-            break
-
-    print("Exit program.")
-
-if __name__ == '__main__':
-    main()
+            return
 
