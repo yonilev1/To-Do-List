@@ -7,8 +7,6 @@ def get_list():
     return my_list.get_all_tasks()
 
 def main(mission, urgency = None, value_to_add = None, number = None, edit = None):
-        if mission == Options.exit.value:
-            return
 
         if mission == Options.add_task.value:
             my_list.add_task(value_to_add, urgency)
@@ -47,4 +45,3 @@ def main(mission, urgency = None, value_to_add = None, number = None, edit = Non
         elif mission == Options.delete_all_tasks.value:
             my_list.delete_list()
             return
-
