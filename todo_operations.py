@@ -66,7 +66,7 @@ class ToDoList:
         return task_list
 
 
-    def add_task(self, value):
+    def add_task(self, value, urgent):
         """
         Add a new task to the list. A unique task ID is generated, and the task is saved.
 
@@ -77,7 +77,9 @@ class ToDoList:
         self.tasks[str(task_id)] = {
             "task": task_to_add,
             "status": TaskStatus.TODO.value,
+            "urgency": urgent,
             "date_created": str(date.today()),
+            "time_created": datetime.now().strftime("%H:%M:%S"),
             "date_done": ""
         }
         self.save_tasks()
@@ -141,16 +143,20 @@ class ToDoList:
         """
         print("in lo printing")
         table_data = []
+        urgency_order = {"High": 1, "Medium": 2, "Low": 3}
+
         for task_number, task_info in self.tasks.items():
             task_name = task_info["task"]
             current_status = task_info["status"]
+            urgency = task_info["urgency"]
             date_created = task_info["date_created"]
             date_done = task_info["date_done"] if task_info["date_done"] else "Not completed"
 
             if current_status.lower() == status1.lower() or (status2 and current_status.lower() == status2.lower()):
-                table_data.append([task_number, task_name, current_status, date_created, date_done])
-        for i in table_data:
-            print(i)
+                table_data.append([task_name, current_status, urgency, date_created, date_done])
+
+        table_data.sort(key=lambda x: (x[1] != "To Do", urgency_order.get(x[2], float('inf'))))
+
         return table_data
 
 
@@ -161,7 +167,7 @@ class ToDoList:
         :param task_number: The ID of the task whose status is to be checked.
         :return: The status of the task or a message if the task is not found.
         """
-        self.print_tasks(TaskStatus.DONE.value, TaskStatus.TODO.value)
+        #self.print_tasks(TaskStatus.DONE.value, TaskStatus.TODO.value)
         try:
             if task_number in self.tasks:
                 task_info = self.tasks[task_number]

@@ -24,15 +24,13 @@ my_list = todo_operations.ToDoList()
 def get_list():
     return my_list.get_all_tasks()
 
-def main(mission, value_to_add = None, number = None, edit = None):
-    #my_list = todo_operations.ToDoList()
+def main(mission, urgency = None, value_to_add = None, number = None, edit = None):
     while True:
-        #mission = get_users_choice()
         if mission == Options.exit.value:
             break
 
         if mission == Options.add_task.value:
-            my_list.add_task(value_to_add)
+            my_list.add_task(value_to_add, urgency)
             break
 
         elif mission == Options.remove_task.value:
