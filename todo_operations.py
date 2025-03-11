@@ -22,6 +22,7 @@ class ToDoList:
         self.load_tasks()
 
 
+
     def load_tasks(self):
         """
         Load tasks from the file into the tasks' dictionary.
@@ -49,7 +50,7 @@ class ToDoList:
         """
         while True:
             task_id = random.randint(1000, 9999999)
-            if str(task_id) not in self.tasks:
+            if str(task_id) not in self.tasks.keys():
                 return str(task_id)
 
 
@@ -83,7 +84,6 @@ class ToDoList:
             "date_done": ""
         }
         self.save_tasks()
-        print(f"added task {task_to_add} successfully")
 
 
     def remove_task(self, task_num_to_remove):
@@ -95,9 +95,6 @@ class ToDoList:
         if task_num_to_remove in self.tasks.keys():
             del self.tasks[task_num_to_remove]
             self.save_tasks()
-            print(f"Task '{task_num_to_remove}' has been deleted.")
-        else:
-            print(f"Task '{task_num_to_remove}' was not found in the list.")
 
 
     def edit_task(self, num_task_to_edit, new_task):
@@ -111,9 +108,6 @@ class ToDoList:
         if num_task_to_edit in self.tasks:
             self.tasks[num_task_to_edit]["task"] = new_task
             self.save_tasks()
-            print(f"Task '{num_task_to_edit} - {new_task}' has been updated.")
-        else:
-            print(f"Task '{num_task_to_edit}' was not found in the list.")
 
 
     def mark_task(self, status: str, task_num_to_mark):
@@ -129,9 +123,6 @@ class ToDoList:
             self.tasks[task_num_to_mark]["status"] = new_status
             self.tasks[task_num_to_mark]["date_done"] = str(date.today()) if status.lower() == "done" else ""
             self.save_tasks()
-            print(f"Task '{task_num_to_mark} - {new_status}' has been updated.")
-        else:
-            print(f"Task '{task_num_to_mark}' was not found.")
 
 
     def print_tasks(self, status1: str, status2=None):
@@ -141,23 +132,25 @@ class ToDoList:
         :param status1: The first status to filter tasks by.
         :param status2: An optional second status to filter tasks by.
         """
-        print("in lo printing")
-        table_data = []
-        urgency_order = {"High": 1, "Medium": 2, "Low": 3}
+        try:
+            table_data = []
+            urgency_order = {"High": 1, "Medium": 2, "Low": 3}
 
-        for task_number, task_info in self.tasks.items():
-            task_name = task_info["task"]
-            current_status = task_info["status"]
-            urgency = task_info["urgency"]
-            date_created = task_info["date_created"]
-            date_done = task_info["date_done"] if task_info["date_done"] else "Not completed"
+            for task_number, task_info in self.tasks.items():
+                task_name = task_info["task"]
+                current_status = task_info["status"]
+                urgency = task_info["urgency"]
+                date_created = task_info["date_created"]
+                date_done = task_info["date_done"] if task_info["date_done"] else "Not completed"
 
-            if current_status.lower() == status1.lower() or (status2 and current_status.lower() == status2.lower()):
-                table_data.append([task_name, current_status, urgency, date_created, date_done])
+                if current_status.lower() == status1.lower() or (status2 and current_status.lower() == status2.lower()):
+                    table_data.append([task_name, current_status, urgency, date_created, date_done])
 
-        table_data.sort(key=lambda x: (x[1] != "To Do", urgency_order.get(x[2], float('inf'))))
+            table_data.sort(key=lambda x: (x[1] != "To Do", urgency_order.get(x[2], float('inf'))))
 
-        return table_data
+            return table_data
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            return str(e)
 
 
     def print_status(self, task_number):
@@ -174,8 +167,8 @@ class ToDoList:
                 return task_info["status"]
             else:
                 return "Task not found."
-        except ValueError:
-            print("Invalid input. Please enter a valid task number.")
+        except ValueError as e:
+            return str(e)
 
 
     def delete_list(self):
