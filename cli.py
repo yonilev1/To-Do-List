@@ -40,4 +40,3 @@ def operations(mission, urgency = None, value_to_add = None, number = None, edit
 
     elif mission == Options.delete_all_tasks.value:
         my_list.delete_list()
-        return

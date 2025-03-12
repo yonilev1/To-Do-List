@@ -71,6 +71,7 @@ class ToDoList:
         """
         Add a new task to the list. A unique task ID is generated, and the task is saved.
 
+        :param urgent: urgency of task
         :param value: The description of the task to be added.
         """
         task_to_add = value

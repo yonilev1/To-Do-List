@@ -37,8 +37,6 @@ def create_main_window():
 
     exit_button = SG.Button('Exit')
 
-    # Listbox to display the tasks
-    list_box = SG.Listbox(values=cli.get_list(), key='list of todos', enable_events=True, size=(45, 10))
 
     # Define the layout for the window, arranging labels and buttons
     layout = [
@@ -66,7 +64,7 @@ def case_add():
             [SG.Text("Enter the task details:")],
             [SG.InputText(tooltip='Enter task name', key='task_name')],
             [SG.Text("Select Priority:"), SG.Combo(["Low", "Medium", "High"], default_value="Medium", key='priority')],
-            [SG.Button('Save'), SG.Button('Cancel')]
+            [SG.Button('Save', bind_return_key=True), SG.Button('Cancel')]
         ],
         font=('Helvetica', 15)
     )
@@ -94,7 +92,7 @@ def case_delete():
     list_box = SG.Listbox(values=formatted_tasks, key='selected_task', size=(45, 10))
     window_delete = SG.Window("Delete Task",
                               layout=[[SG.Text('Select a task to delete:'), list_box],
-                                      [SG.Button('Delete Task'), SG.Button('Cancel')]],
+                                      [SG.Button('Delete Task', bind_return_key=True), SG.Button('Cancel')]],
                               font=('helvetica', 15))
 
     delete_event1, selected_task = window_delete.read(close=True)
@@ -121,7 +119,7 @@ def case_edit():
         list_box = SG.Listbox(values=formatted_tasks, key='selected_task', size=(45, 10))
         window_delete = SG.Window("Edit Task:",
                                   layout=[[SG.Text('Select a task to edit:'), list_box],
-                                          [SG.Button('Edit Task'), SG.Button('Cancel')]],
+                                          [SG.Button('Edit Task', bind_return_key=True), SG.Button('Cancel')]],
                                   font=('helvetica', 15))
 
         edit_event1, selected_task = window_delete.read(close=True)
@@ -157,58 +155,32 @@ def case_edit():
     except Exception as e:
         SG.popup_error(f"Error in edit task window: {str(e)}", font=('helvetica', 15))
 
-def case_mark_done():
+def case_mark_done_or_to_do(number):
+    status = "Done" if number == 4 else "To Do"
     try:
         tasks_list = cli.get_list()
         formatted_tasks = [f"{task[0]} - {task[1]} ({task[2]})" for task in tasks_list]
 
         list_box = SG.Listbox(values=formatted_tasks, key='selected_task', size=(45, 10))
-        window_delete = SG.Window("Mark As Done",
-                                  layout=[[SG.Text('Select a task to mark done:'), list_box],
-                                          [SG.Button('Mark Task'), SG.Button('Cancel')]],
+        window_delete = SG.Window(f"Set As {status}",
+                                  layout=[[SG.Text(f'Select a task to set {status.lower()}:'), list_box],
+                                          [SG.Button('Set Task', bind_return_key=True), SG.Button('Cancel')]],
                                   font=('helvetica', 15))
 
         mark_event1, selected_task = window_delete.read(close=True)
 
-        if mark_event1 == "Mark Task":
+        if mark_event1 == "Set Task":
             if not selected_task['selected_task']:
-                SG.popup_error("No task selected! Please select a task to mark done.", font=('helvetica', 15))
+                SG.popup_error(f"No task selected! Please select a task to set {status}.", font=('helvetica', 15))
                 return
             try:
                 task_number = re.search(r'\d+', selected_task['selected_task'][0]).group()
-                cli.operations(4, "","", task_number)  # Call CLI to mark the task as done
-                SG.popup("Task marked as done successfully!", font=('helvetica', 15))
+                cli.operations(number, "","", task_number)  # Call CLI to mark the task as done
+                SG.popup(f"Task set as {status} successfully!", font=('helvetica', 15))
             except (AttributeError, IndexError) as e:
                 SG.popup_error(f"Error processing selection: {str(e)}", font=('helvetica', 15))
     except Exception as e:
         SG.popup_error(f"Error in mark task window: {str(e)}", font=('helvetica', 15))
-
-
-def case_mark_to_do():
-    try:
-        tasks_list = cli.get_list()
-        formatted_tasks = [f"{task[0]} - {task[1]} ({task[2]})" for task in tasks_list]
-
-        list_box = SG.Listbox(values=formatted_tasks, key='selected_task', size=(45, 10))
-        window_delete = SG.Window("Mark as To Do:",
-                                  layout=[[SG.Text('Select a task to mark to do:'), list_box],
-                                          [SG.Button('Unmark Task'), SG.Button('Cancel')]],
-                                  font=('helvetica', 15))
-
-        unmark_event1, selected_task = window_delete.read(close=True)
-
-        if unmark_event1 == "Unmark Task":
-            if not selected_task['selected_task']:
-                SG.popup_error("No task selected! Please select a task to mark to do.", font=('helvetica', 15))
-                return
-            try:
-                task_number = re.search(r'\d+', selected_task['selected_task'][0]).group()
-                cli.operations(5, "","", task_number)  # Call CLI to unmark the task
-                SG.popup("Task marked as to-do successfully!", font=('helvetica', 15))
-            except (AttributeError, IndexError) as e:
-                SG.popup_error(f"Error processing selection: {str(e)}", font=('helvetica', 15))
-    except Exception as e:
-        SG.popup_error(f"Error in unmark task window: {str(e)}", font=('helvetica', 15))
 
 
 def case_show_all():
@@ -279,7 +251,7 @@ def case_show_status():
         list_box = SG.Listbox(values=task_list_no_id, key='selected_task', size=(45, 10))
         window_print_status = SG.Window("Print status:",
                                         layout=[[SG.Text('Select a task to print:'), list_box],
-                                                [SG.Button('Print status'), SG.Button('Cancel')]],
+                                                [SG.Button('Print status', bind_return_key=True), SG.Button('Cancel')]],
                                         font=('helvetica', 15))
 
         print_event1, selected_task = window_print_status.read(close=True)
@@ -323,11 +295,7 @@ def case_show_status():
 def main():
     window = create_main_window()
     while True:
-        #window = create_main_window()
         event, values = window.read()
-        print(values)  # Debug: print current values in the window
-        print(event)   # Debug: print the event triggered by user interaction
-
         # Handle events based on button clicks
         match event:
             case 'Add Task':  # Add new task
@@ -340,10 +308,10 @@ def main():
                case_edit()
 
             case "Mark As Done":  # Mark task as done
-               case_mark_done()
+               case_mark_done_or_to_do(4)
 
             case "Mark As To Do":  # Unmark task as done
-                case_mark_to_do()
+                case_mark_done_or_to_do(5)
 
             case "Show All Tasks":  # Display all tasks
                 case_show_all()
